@@ -1,3 +1,51 @@
+## 🚀 Enhancement: Byte Size & Time Duration Token Support
+
+Wrangler now supports **parsing of Byte Size** and **Time Duration** tokens directly in directives. This enables more natural handling of values like `10KB` or `500ms` without requiring custom parsing in user code.
+
+---
+
+### 🔤 Supported Tokens
+
+#### Byte Size Examples
+- `10KB`
+- `1.5MB`
+- `100B`
+
+These are parsed into bytes using binary units (e.g., 1KB = 1024 bytes).
+
+#### Time Duration Examples
+- `100ms`
+- `2s`
+- `1.5min`
+
+These are parsed into nanoseconds internally.
+
+---
+
+### ✅ What's Implemented
+
+- Added lexer and parser support for `BYTE_SIZE` and `TIME_DURATION` in `Directives.g4`
+- Created `ByteSize.java` and `TimeDuration.java` token classes
+- Each class exposes canonical methods like:
+  - `getBytes()` for `ByteSize`
+  - `getNanoseconds()` for `TimeDuration`
+- Included unit tests for accurate parsing and value conversion
+
+---
+
+### 📘 Example Usage (Parsing Only)
+
+In a custom directive or during directive parsing, these tokens can now be accepted as arguments and parsed using:
+
+```java
+ByteSize byteSize = new ByteSize("1.5MB");
+long bytes = byteSize.getBytes(); // 1572864
+
+TimeDuration time = new TimeDuration("500ms");
+long nanos = time.getNanoseconds(); // 500,000,000
+
+
+
 # Data Prep
 
 ![cm-available](https://cdap-users.herokuapp.com/assets/cm-available.svg)
@@ -8,35 +56,25 @@
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/io.cdap.wrangler/wrangler-core/badge.svg)](http://www.javadoc.io/doc/io.cdap.wrangler/wrangler-core)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Join CDAP community](https://cdap-users.herokuapp.com/badge.svg?t=wrangler)](https://cdap-users.herokuapp.com?t=1)
-
 A collection of libraries, a pipeline plugin, and a CDAP service for performing data
 cleansing, transformation, and filtering using a set of data manipulation instructions
 (directives). These instructions are either generated using an interative visual tool or
 are manually created.
-
   * Data Prep defines few concepts that might be useful if you are just getting started with it. Learn about them [here](wrangler-docs/concepts.md)
   * The Data Prep Transform is [separately documented](wrangler-transform/wrangler-docs/data-prep-transform.md).
   * [Data Prep Cheatsheet](wrangler-docs/cheatsheet.md)
-
 ## New Features
-
 More [here](wrangler-docs/upcoming-features.md) on upcoming features.
-
   * **User Defined Directives, also known as UDD**, allow you to create custom functions to transform records within CDAP DataPrep or a.k.a Wrangler. CDAP comes with a comprehensive library of functions. There are however some omissions, and some specific cases for which UDDs are the solution. Additional information on how you can build your custom directives [here](wrangler-docs/custom-directive.md).
     * Migrating directives from version 1.0 to version 2.0 [here](wrangler-docs/directive-migration.md)
     * Information about Grammar [here](wrangler-docs/grammar/grammar-info.md)
     * Various `TokenType` supported by system [here](../api/src/main/java/io/cdap/wrangler/api/parser/TokenType.java)
     * Custom Directive Implementation Internals [here](wrangler-docs/udd-internal.md)
-
   * A new capability that allows CDAP Administrators to **restrict the directives** that are accessible to their users.
 More information on configuring can be found [here](wrangler-docs/exclusion-and-aliasing.md)
-
 ## Demo Videos and Recipes
-
 Videos and Screencasts are best way to learn, so we have compiled simple, short screencasts that shows some of the features of Data Prep. Additional videos can be found [here](https://www.youtube.com/playlist?list=PLhmsf-NvXKJn-neqefOrcl4n7zU4TWmIr)
-
 ### Videos
-
   * [SCREENCAST] [Creating Lookup Dataset and Joining](https://www.youtube.com/watch?v=Nc1b0rsELHQ)
   * [SCREENCAST] [Restricted Directives](https://www.youtube.com/watch?v=71EcMQU714U)
   * [SCREENCAST] [Parse Excel files in CDAP](https://www.youtube.com/watch?v=su5L1noGlEk)
@@ -54,17 +92,12 @@ Videos and Screencasts are best way to learn, so we have compiled simple, short 
   * [SCREENCAST] [Data cleansing with send-to-error directive](https://www.youtube.com/watch?v=aZd5H8hIjDc)
   * [SCREENCAST] [Publishing to Kafka](https://www.youtube.com/watch?v=xdc8pvvlI48)
   * [SCREENCAST] [Fixed length to JSON](https://www.youtube.com/watch?v=3AXu4m1swuM)
-
 ### Recipes
-
   * [Parsing Apache Log Files](wrangler-demos/parsing-apache-log-files.md)
   * [Parsing CSV Files and Extracting Column Values](wrangler-demos/parsing-csv-extracting-column-values.md)
   * [Parsing HL7 CCDA XML Files](wrangler-demos/parsing-hl7-ccda-xml-files.md)
-
 ## Available Directives
-
 These directives are currently available:
-
 | Directive                                                              | Description                                                      |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | **Parsers**                                                            |                                                                  |
@@ -163,56 +196,35 @@ These directives are currently available:
 | [DDL](wrangler-docs/functions/ddl-functions.md)                                 | Functions that can manipulate definition of data                 |
 | [JSON](wrangler-docs/functions/json-functions.md)                               | Functions that can be useful in transforming your data           |
 | [Types](wrangler-docs/functions/type-functions.md)                              | Functions for detecting the type of data                         |
-
 ## Performance
-
 Initial performance tests show that with a set of directives of high complexity for
 transforming data, *DataPrep* is able to process at about ~106K records per second. The
 rates below are specified as *records/second*. 
-
 | Directive Complexity | Column Count |    Records |           Size | Mean Rate |
 | -------------------- | :----------: | ---------: | -------------: | --------: |
 | High (167 Directives) |      426      | 127,946,398 |  82,677,845,324 | 106,367.27 |
 | High (167 Directives) |      426      | 511,785,592 | 330,711,381,296 | 105,768.93 |
-
-
 ## Contact
-
 ### Mailing Lists
-
 CDAP User Group and Development Discussions:
-
 * [cdap-user@googlegroups.com](https://groups.google.com/d/forum/cdap-user)
-
 The *cdap-user* mailing list is primarily for users using the product to develop
 applications or building plugins for appplications. You can expect questions from
 users, release announcements, and any other discussions that we think will be helpful
 to the users.
-
 ### IRC Channel
-
 CDAP IRC Channel: [#cdap on irc.freenode.net](http://webchat.freenode.net?channels=%23cdap)
-
 ### Slack Team
-
 CDAP Users on Slack: [cdap-users team](https://cdap-users.herokuapp.com)
-
-
 ## License and Trademarks
-
 Copyright © 2016-2019 Cask Data, Inc.
-
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 in compliance with the License. You may obtain a copy of the License at
-
 http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software distributed under the
 License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the specific language governing permissions
 and limitations under the License.
-
 Cask is a trademark of Cask Data, Inc. All rights reserved.
-
 Apache, Apache HBase, and HBase are trademarks of The Apache Software Foundation. Used with
 permission. No endorsement by The Apache Software Foundation is implied by the use of these marks.
